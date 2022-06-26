@@ -1,27 +1,13 @@
 from django.http import HttpRequest, HttpResponse
-from django.views.generic.base import View, TemplateView
+from django.views.generic.base import View
 from typing import Any, Dict
-from django.template.loader import render_to_string
 
-from django.views.generic.edit import UpdateView
-from simple_django_htmx.mixins import HtmxViewMixin
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+from django.views.decorators.csrf import  ensure_csrf_cookie
+from simple_django_htmx.hx_requests import HXRequest
 
 
 from simple_django_htmx.utils import deserialize_kwargs, is_htmx_request
-
-# Create your views here.
-class CreateUpdateView(UpdateView):
-    def get_object(self, queryset=None):
-        try:
-            return super().get_object(queryset)
-        except AttributeError:
-            return None
-
-
-class HtmxView(View):
-    pass
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -53,7 +39,7 @@ class HtmxVIewMixin(View):
             return hx_request.post(request, *args, **kwargs)
         return super().post(request, *args, **kwargs)
 
-    def get_hx_request(self, request):
+    def get_hx_request(self, request)->HXRequest:
         hx_request_name = request.GET.get("hx_request_name")
         hx_request = next(
             hx_request
