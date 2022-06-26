@@ -1,3 +1,4 @@
+from typing import Dict
 from django.forms import Form
 
 from django.http import HttpRequest, HttpResponse
@@ -15,9 +16,9 @@ class HXRequest:
     name: str
     GET_template: str
     POST_template: str
-    hx_object_name = "hx_object"
+    hx_object_name:str = "hx_object"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs)->Dict:
         context = self.view.get_context_data(**kwargs)
         context.update(**kwargs)
         context[self.hx_object_name] = self.hx_object
@@ -56,7 +57,7 @@ class FormHXRequest(HXRequest):
 
     form_class: Form
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs)->Dict:
         context = super().get_context_data(**kwargs)
         context["form"] = self.form
         return context
