@@ -19,13 +19,13 @@ keywords = ["django", "htmx"]
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-    ],
+]
 include = [
-    "LICENSE",
+    "LICENSE"
 ]
 [tool.poetry.dependencies]
 python = "^3.8"
-Django = ">= 3.2.0"
+Django = ">= 3.2"
 
 [tool.poetry.dev-dependencies]
 
