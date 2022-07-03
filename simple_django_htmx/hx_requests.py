@@ -20,7 +20,7 @@ class HXRequest:
 
     def get_context_data(self, **kwargs)->Dict:
         context = self.view.get_context_data(**kwargs)
-        context.update(**kwargs)
+        context['hx_kwargs'] = self.kwargs
         context[self.hx_object_name] = self.hx_object
         context["request"] = self.request
         context["hx_request"] = self
