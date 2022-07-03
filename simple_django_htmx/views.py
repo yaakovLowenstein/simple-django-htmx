@@ -25,7 +25,7 @@ class HtmxVIewMixin(View):
             super().get(request, *args, **kwargs)
             hx_request = self.get_hx_request(request)
             hx_request.view = self
-            kwargs.update(self.get_extra_kwargs(request))
+            hx_request.kwargs = self.get_extra_kwargs(request)
             return hx_request.get(request, *args, **kwargs)
         return super().get(request, *args, **kwargs)
 
@@ -35,7 +35,7 @@ class HtmxVIewMixin(View):
             super().get(request, *args, **kwargs)
             hx_request = self.get_hx_request(request)
             hx_request.view = self
-            kwargs.update(self.get_extra_kwargs(request))
+            hx_request.kwargs = self.get_extra_kwargs(request)
             return hx_request.post(request, *args, **kwargs)
         return super().post(request, *args, **kwargs)
 
