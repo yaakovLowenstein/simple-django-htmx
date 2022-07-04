@@ -1,10 +1,7 @@
 # simple-django-htmx
 <br>
-<br>
 
 ## Overview
-
-<br>
 
 A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests witout needing additional urls, and reduce clutter in views by offloading all responsibility to an <em>hx_request</em>.
 
@@ -12,7 +9,6 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
 
 ## Why use?
 
-<br>
 
 - Avoid cluttering up urls with endpoints for HTMX
 - Reduce clutter in views by avoiding if/elses that are checking if the incoming request is an HTMX request
@@ -22,7 +18,6 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
 
 ## How to use
 
-<br>
 
 - ### **Installation**
        pip install simple-django-htmx
@@ -82,7 +77,6 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
 
 ## A Deeper Dive
 
-<br>
 
 ### **---HXRequest Classes---**
 
@@ -165,8 +159,6 @@ Deletes the object passed into `render_hx`. Can override `handle_delete` for cus
 
 ## Future Features
 
-
-<br>
 
 - Aysnchronous messaging.
 - Auto filling initial of form fields with kwargs if the kwarg key matches the form field.
