@@ -26,7 +26,7 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
 
 - ### **Installation**
        pip install simple-django-htmx
-    - Add simple-django-htmx to your list of installed apps
+    - Add simple_django_htmx to your list of installed apps
     - You will also need to have HTMX installed. See https://htmx.org/
   
 <br>
