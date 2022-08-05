@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "simple-django-htmx"
-version = "0.1.10"
+version = "0.2.1"
 description = "Simple package that facilitates the usage of HTMX with Django"
 authors = ["yaakovLowenstein <lowensteinyaakov@gmail.com>"]
 license = "MIT"
