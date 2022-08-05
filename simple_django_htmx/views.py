@@ -1,13 +1,14 @@
 from django.http import HttpRequest, HttpResponse
 from django.views.generic.base import View
 from typing import Any, Dict
+import json
 
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import  ensure_csrf_cookie
-from simple_django_htmx.hx_requests import HXRequest
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 from simple_django_htmx.utils import deserialize_kwargs, is_htmx_request
+from django.conf import settings
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -39,7 +40,7 @@ class HtmxVIewMixin(View):
             return hx_request.post(request, *args, **kwargs)
         return super().post(request, *args, **kwargs)
 
-    def get_hx_request(self, request)->HXRequest:
+    def get_hx_request(self, request):
         hx_request_name = request.GET.get("hx_request_name")
         hx_request = next(
             hx_request
@@ -54,3 +55,26 @@ class HtmxVIewMixin(View):
             kwargs[key] = request.GET.get(key)
 
         return deserialize_kwargs(**kwargs)
+
+
+class MessagesMixin:
+    show_messages: bool = getattr(settings, "HX_REQUESTS_SHOW_MESSAGES", False)
+    success_message: str = ""
+    error_message: str = ""
+
+    def get_success_message(self, request, **kwargs) -> str:
+        return self.success_message
+
+    def get_error_message(self, request, **kwargs) -> str:
+        return self.error_message
+
+    def setup_header_for_messages(self, message, level) -> Dict:
+        return (
+            {
+                "HX-Trigger": json.dumps(
+                    {"showMessages": {"message": message, "level": level}}
+                )
+            }
+            if self.show_messages
+            else {}
+        )

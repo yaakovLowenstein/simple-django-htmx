@@ -1,11 +1,9 @@
 from typing import Dict
 from django.forms import Form
-
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.apps import apps
-from django.conf import settings
-from django.contrib.messages import get_messages
+from simple_django_htmx.views import MessagesMixin
 
 
 class HXRequest:
@@ -13,14 +11,14 @@ class HXRequest:
     HXRequest is the base class for Htmx requests.
     """
 
-    name: str
-    GET_template: str
-    POST_template: str
-    hx_object_name:str = "hx_object"
+    name: str = ""
+    GET_template: str = ""
+    POST_template: str = ""
+    hx_object_name: str = "hx_object"
 
-    def get_context_data(self, **kwargs)->Dict:
+    def get_context_data(self, **kwargs) -> Dict:
         context = self.view.get_context_data(**kwargs)
-        context['hx_kwargs'] = self.kwargs
+        context["hx_kwargs"] = self.kwargs
         context[self.hx_object_name] = self.hx_object
         context["request"] = self.request
         context["hx_request"] = self
@@ -37,15 +35,18 @@ class HXRequest:
         self.setup_hx_request(request)
         context = self.get_context_data(**kwargs)
         html = render_to_string(self.GET_template, context, request)
-        return HttpResponse(html)
+        return HttpResponse(html, headers=self.get_GET_headers(**kwargs))
 
     def setup_hx_request(self, request):
+        self.request = request
         if not hasattr(self, "hx_object"):
             self.hx_object = self.get_hx_object(request)
-        self.request = request
+
+    def get_GET_headers(self, **kwargs) -> Dict:
+        return {}
 
 
-class FormHXRequest(HXRequest):
+class FormHXRequest(HXRequest, MessagesMixin):
     """
     Adds in form to context.
     On POST if the form is valid returns form_valid OR the POST_template.
@@ -56,8 +57,9 @@ class FormHXRequest(HXRequest):
     """
 
     form_class: Form
+    _is_valid: bool
 
-    def get_context_data(self, **kwargs)->Dict:
+    def get_context_data(self, **kwargs) -> Dict:
         context = super().get_context_data(**kwargs)
         context["form"] = self.form
         return context
@@ -73,22 +75,26 @@ class FormHXRequest(HXRequest):
         self.form = self.form_class(**self.get_form_kwargs(**kwargs))
 
         if self.form.is_valid():
-            response = self.form_valid(self.form, self.request, **kwargs)
             context = self.get_context_data(**kwargs)
-            html = render_to_string(self.POST_template, context, request)
-            return response or HttpResponse(html)
+            response = self.form_valid(self.form, self.request, context, **kwargs)
+            message, level = self.get_success_message(request, **kwargs), "success"
+
         else:
             context = self.get_context_data(**kwargs)
-            html = render_to_string(self.GET_template, context, request)
-            return self.form_invalid(self.form, self.request, **kwargs) or HttpResponse(
-                html
-            )
+            response = self.form_invalid(self.form, self.request, context, **kwargs)
+            message, level = self.get_error_message(request, **kwargs), "danger"
 
-    def form_valid(self, form, request, **kwargs):
+        return HttpResponse(
+            response,
+            headers=self.get_POST_headers(message=message, level=level, **kwargs),
+        )
+
+    def form_valid(self, form, request, context, **kwargs) -> str:
         form.save()
+        return render_to_string(self.POST_template, context, request)
 
-    def form_invalid(self, form, request, **kwargs):
-        pass
+    def form_invalid(self, form, request, context, **kwargs) -> str:
+        return render_to_string(self.GET_template, context, request)
 
     def get_form_kwargs(self, **kwargs):
         """Return the keyword arguments for instantiating the form."""
@@ -108,8 +114,27 @@ class FormHXRequest(HXRequest):
     def get_initial(self):
         return {}
 
+    def get_success_message(self, request, **kwargs) -> str:
+        return (
+            self.success_message
+            or f"{self.hx_object._meta.model.__name__.capitalize()} saved successfully."
+        )
 
-class DeleteHXRequest(HXRequest):
+    def get_error_message(self, request, **kwargs) -> str:
+        return (
+            self.error_message
+            or f"{self.hx_object._meta.model.__name__.capitalize()} did not save successfully."
+        )
+
+    def get_POST_headers(self, **kwargs) -> Dict:
+        headers = {}
+        headers.update(
+            **self.setup_header_for_messages(kwargs.get("message"), kwargs.get("level"))
+        )
+        return headers
+
+
+class DeleteHXRequest(HXRequest, MessagesMixin):
     """
     HXRequest for deleting objects. Can override handle_delete
     for custom behavior.
@@ -117,11 +142,27 @@ class DeleteHXRequest(HXRequest):
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.setup_hx_request(request)
-        response = self.handle_delete(self.request, **kwargs)
-
         context = self.get_context_data(**kwargs)
-        html = render_to_string(self.POST_template, context, request)
-        return response or HttpResponse(html)
+        response = self.handle_delete(self.request, context, **kwargs)
+        message, level = self.get_success_message(request, **kwargs), "success"
+        return HttpResponse(
+            response,
+            headers=self.get_POST_headers(message=message, level=level, **kwargs),
+        )
 
-    def handle_delete(self, request, **kwargs):
+    def handle_delete(self, request, context, **kwargs) -> str:
         self.hx_object.delete()
+        return render_to_string(self.POST_template, context, request)
+
+    def get_success_message(self, request, **kwargs) -> str:
+        return (
+            self.success_message
+            or f"{self.hx_object._meta.model.__name__.capitalize()} deleted successfully."
+        )
+
+    def get_POST_headers(self, **kwargs) -> Dict:
+        headers = {}
+        headers.update(
+            **self.setup_header_for_messages(kwargs.get("message"), kwargs.get("level"))
+        )
+        return headers
