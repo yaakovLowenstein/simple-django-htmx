@@ -1,3 +1,6 @@
+import importlib
+import inspect
+from django.apps import apps
 from django.http import HttpRequest, HttpResponse
 from django.views.generic.base import View
 from typing import Any, Dict
@@ -42,12 +45,31 @@ class HtmxVIewMixin(View):
 
     def get_hx_request(self, request):
         hx_request_name = request.GET.get("hx_request_name")
+        hx_reqeusts = self.get_hx_reqeust_classes()
         hx_request = next(
             hx_request
-            for hx_request in self.hx_requests
-            if hx_request.name == hx_request_name
+            for name, hx_request in hx_reqeusts.items()
+            if name == hx_request_name
         )
         return hx_request()
+
+    def get_hx_reqeust_classes(self):
+        from .hx_requests import HXRequest
+
+        modules = []
+        hx_request_classes = {}
+        for app in apps.get_app_configs():
+            if app.label != __package__:
+                try:
+                    modules.append(importlib.import_module(f"{app.label}.hx_requests"))
+                except ModuleNotFoundError:
+                    pass
+        for module in modules:
+            clsmembers = inspect.getmembers(module, inspect.isclass)
+            for _, obj in clsmembers:
+                if issubclass(obj, HXRequest) and getattr(obj, "name", None):
+                    hx_request_classes[obj.name] = obj
+        return hx_request_classes
 
     def get_extra_kwargs(self, request):
         kwargs = {}
