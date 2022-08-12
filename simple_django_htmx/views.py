@@ -45,16 +45,21 @@ class HtmxVIewMixin(View):
 
     def get_hx_request(self, request):
         hx_request_name = request.GET.get("hx_request_name")
-        hx_reqeusts = self.get_hx_reqeust_classes()
+        self._get_hx_reqeust_classes()
         hx_request = next(
             hx_request
-            for name, hx_request in hx_reqeusts.items()
+            for name, hx_request in self.hx_requests.items()
             if name == hx_request_name
         )
         return hx_request()
 
-    def get_hx_reqeust_classes(self):
+    @classmethod
+    def _get_hx_reqeust_classes(cls):
         from .hx_requests import HXRequest
+
+        # If the hx_requests are already set don't need to do the whole collection.
+        if getattr(cls, "hx_requests", None):
+            return
 
         modules = []
         hx_request_classes = {}
@@ -69,7 +74,7 @@ class HtmxVIewMixin(View):
             for _, obj in clsmembers:
                 if issubclass(obj, HXRequest) and getattr(obj, "name", None):
                     hx_request_classes[obj.name] = obj
-        return hx_request_classes
+        cls.hx_requests = hx_request_classes
 
     def get_extra_kwargs(self, request):
         kwargs = {}
