@@ -115,16 +115,26 @@ class FormHXRequest(HXRequest, MessagesMixin):
         return {}
 
     def get_success_message(self, request, **kwargs) -> str:
-        return (
-            self.success_message
-            or f"{self.hx_object._meta.model.__name__.capitalize()} saved successfully."
+        object_name = (
+            self.hx_object._meta.model.__name__.capitalize() if self.hx_object else None
         )
+        message = (
+            self.success_message or f"{object_name} saved successfully."
+            if object_name
+            else "Saved Successfully"
+        )
+        return message
 
     def get_error_message(self, request, **kwargs) -> str:
-        return (
-            self.error_message
-            or f"{self.hx_object._meta.model.__name__.capitalize()} did not save successfully."
+        object_name = (
+            self.hx_object._meta.model.__name__.capitalize() if self.hx_object else None
         )
+        message = (
+            self.error_message or f"{object_name} did not save  successfully."
+            if object_name
+            else "Did not save successfully"
+        )
+        return message
 
     def get_POST_headers(self, **kwargs) -> Dict:
         headers = {}
@@ -155,10 +165,15 @@ class DeleteHXRequest(HXRequest, MessagesMixin):
         return render_to_string(self.POST_template, context, request)
 
     def get_success_message(self, request, **kwargs) -> str:
-        return (
-            self.success_message
-            or f"{self.hx_object._meta.model.__name__.capitalize()} deleted successfully."
+        object_name = (
+            self.hx_object._meta.model.__name__.capitalize() if self.hx_object else None
         )
+        message = (
+            self.error_message or f"{object_name} deleted successfully."
+            if object_name
+            else "Deleted successfully"
+        )
+        return message
 
     def get_POST_headers(self, **kwargs) -> Dict:
         headers = {}
