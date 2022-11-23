@@ -5,6 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.views.generic.base import View
 from typing import Any, Dict
 import json
+from django.contrib import messages
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -29,7 +30,7 @@ class HtmxVIewMixin(View):
             super().get(request, *args, **kwargs)
             hx_request = self.get_hx_request(request)
             hx_request.view = self
-            hx_request.kwargs = self.get_extra_kwargs(request)
+            kwargs = self.get_extra_kwargs(request)
             return hx_request.get(request, *args, **kwargs)
         return super().get(request, *args, **kwargs)
 
@@ -39,7 +40,7 @@ class HtmxVIewMixin(View):
             super().get(request, *args, **kwargs)
             hx_request = self.get_hx_request(request)
             hx_request.view = self
-            hx_request.kwargs = self.get_extra_kwargs(request)
+            kwargs = self.get_extra_kwargs(request)
             return hx_request.post(request, *args, **kwargs)
         return super().post(request, *args, **kwargs)
 
@@ -60,7 +61,6 @@ class HtmxVIewMixin(View):
         # If the hx_requests are already set don't need to do the whole collection.
         if getattr(cls, "hx_requests", None):
             return
-
         modules = []
         hx_request_classes = {}
         for app in apps.get_app_configs():
@@ -95,13 +95,21 @@ class MessagesMixin:
     def get_error_message(self, request, **kwargs) -> str:
         return self.error_message
 
-    def setup_header_for_messages(self, message, level) -> Dict:
-        return (
-            {
-                "HX-Trigger": json.dumps(
-                    {"showMessages": {"message": message, "level": level}}
-                )
-            }
-            if self.show_messages
-            else {}
-        )
+    def get_POST_headers(self, **kwargs) -> Dict:
+        headers = {}
+        message = kwargs.get("message")
+        level = kwargs.get("level")
+
+        if self.refresh_page == True:
+            if level == "success":
+                messages.success(self.request, message)
+            elif level == "danger":
+                messages.error(self.request, message)
+            else:
+                messages.info(self.request, message)
+            return {}
+        elif self.show_messages:
+            headers["HX-Trigger"] = json.dumps(
+                {"showMessages": {"message": message, "level": level}}
+            )
+        return headers
