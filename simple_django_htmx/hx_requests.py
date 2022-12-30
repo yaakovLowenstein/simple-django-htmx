@@ -191,8 +191,7 @@ class DeleteHXRequest(HXRequest, MessagesMixin):
         return message
 
     def get_POST_headers(self, **kwargs) -> Dict:
-        headers = {}
-        headers.update(
-            **self.setup_header_for_messages(kwargs.get("message"), kwargs.get("level"))
-        )
+        headers = super().get_POST_headers(**kwargs)
+        if self.refresh_page:
+            headers["HX-Refresh"] = "true"
         return headers
