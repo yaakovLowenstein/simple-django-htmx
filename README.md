@@ -23,11 +23,11 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
        pip install simple-django-htmx
     - Add simple_django_htmx to your list of installed apps
     - You will also need to have HTMX installed. See https://htmx.org/
-  
+
 <br>
 
 - ### **Quick Example**
-  
+
 <br>
 
 1. Create an HXRequest:
@@ -56,11 +56,11 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
             </td>
             <td>
                 <button {% render_hx  'edit_user' 'get' object=user %} hx-target="closest tr" hx-swap="outerHTML">Edit</button>
-            </td>  
+            </td>
         </tr>
 
 3. Load the HXRequest into the view that it's being used in. The view needs to inherit from HtmxViewMixin and the view needs to provide a list of hx_requests that will be used in the view.
-   
+
          class UserListView(HtmxVIewMixin, ListView):
             template_name = "user_list.html"
             model = User
@@ -69,9 +69,9 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
             ]
 
 4. Voila! on the click of the Edit button the GET_template from EditUserHxRequest will be loaded.
-   
+
    - The view is neat and clean and there was no need to create a url for the edit button to hit.
-  
+
 
 <br>
 
@@ -88,7 +88,7 @@ A package to simplify the usage of HTMX with Django. Easily add HTMX reuqests wi
 
 <br>
 
-A wrapper for HTMX requests. Instead of the GET/POST getting dircted to a view, it goes to an HXRequest. 
+A wrapper for HTMX requests. Instead of the GET/POST getting dircted to a view, it goes to an HXRequest.
 
 - **Attributes**
      - name: Unique string that is used to identify which HXRequest the HTMX reuqest should direct to
@@ -100,9 +100,9 @@ A wrapper for HTMX requests. Instead of the GET/POST getting dircted to a view, 
 
 - **Methods**
     - get_context_data: Same as a view's get_context_data. HXRequest's add in a few additional items into the context.
-        - hx_kwargs -> These are any kwargs passed into `render_hx` 
+        - hx_kwargs -> These are any kwargs passed into `render_hx`
         - hx_object (or the name given to it using `hx_object_name`) -> The object passed into `render_hx`. In the `FormHXRequest` this object acts like the object of a Django UpdateView.
-        - hx_request: The HXRequest 
+        - hx_request: The HXRequest
 
 <br>
 
@@ -121,7 +121,7 @@ Acts like a a Django UpdateView. When a form is valid it saves the form and by d
 <br>
 
 - **Methods**
-  
+
   - form_valid: Method called when the form is valid. By default it just calls `form.save()`. Has access to kwargs sent in through the `render_hx` template tag.
   - form_invalid: Method called when the form is invalid. No default. Has access to kwargs sent in through the `render_hx` template tag.
   - get_form_kwargs: Injects kwargs into the form. Can override to put items into the form. i.e. to set initial values. Has access to kwargs sent in through the `render_hx` template tag.
@@ -150,7 +150,7 @@ Deletes the object passed into `render_hx`. Can override `handle_delete` for cus
 - Name of the HXReqest
 - Type of reuqest, get or post
 - object (optional), the object that is used by the request. It is treated just like the object of an UpdateView
-- kwargs, addional params that can be passed in. These kwargs can be used in get_form_kwargs, form_valid, of form_invalid. 
+- kwargs, addional params that can be passed in. These kwargs can be used in get_form_kwargs, form_valid, of form_invalid.
     - Example -> The template has a user and is looping through the contact methods of the user. There is an HXRequest on each contact method that lets you edit the contact method. Would need to pass in the contact method as the object. Addionally the page has an add new button which allows you to add a new contact method to this user, you would need to pass an addional kwarg for the user because when saving the new contact method, the back end needs to know which user we are saving this for.
 
             <button {% hx_request_name='render_hx create_update_contact_method' method="get" object="contact_method" user=user %} hx-target="closest tr" ></button>
