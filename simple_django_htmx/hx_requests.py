@@ -16,6 +16,7 @@ class HXRequest:
     POST_template: str = ""
     hx_object_name: str = "hx_object"
     refresh_page: bool = False
+    redirect: str = None
 
     def get_context_data(self, **kwargs) -> Dict:
         context = self.view.get_context_data()
@@ -106,8 +107,11 @@ class FormHXRequest(MessagesMixin, HXRequest):
     def form_valid(self, form, **kwargs) -> str:
         form.save()
         # if refreshing page, no need for a post template
+        # TODO for refresh and redirect. if either of them set new attr and check that here
         post_template = (
-            self.POST_template if not self.refresh_page else self.GET_template
+            self.POST_template
+            if not self.refresh_page or self.redirect
+            else self.GET_template
         )
         return self.get_response(post_template, **kwargs)
 
@@ -157,6 +161,8 @@ class FormHXRequest(MessagesMixin, HXRequest):
         headers = super().get_POST_headers(**kwargs)
         if self.refresh_page:
             headers["HX-Refresh"] = "true"
+        elif self.redirect:
+            headers["HX-Redirect"] = self.redirect
         return headers
 
 
@@ -194,4 +200,6 @@ class DeleteHXRequest(HXRequest, MessagesMixin):
         headers = super().get_POST_headers(**kwargs)
         if self.refresh_page:
             headers["HX-Refresh"] = "true"
+        elif self.redirect:
+            headers["HX-Redirect"] = self.redirect
         return headers
