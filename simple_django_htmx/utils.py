@@ -1,5 +1,5 @@
-from django.db import models
 from django.apps import apps
+from django.db import models
 
 
 def is_htmx_request(request):
@@ -7,7 +7,6 @@ def is_htmx_request(request):
 
 
 def serialize_kwargs(**kwargs):
-
     for k, v in kwargs.items():
         if isinstance(v, models.Model):
             kwargs[k] = f"___{v._meta.app_label}_{v._meta.model.__name__}_{v.pk}"

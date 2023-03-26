@@ -1,6 +1,6 @@
 name: Auto.Tag
 
-on: 
+on:
 - push
 
 jobs:
@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: 
+        node-version:
         - 12
-    steps: 
+    steps:
     - uses: phish108/autotag-action@1.1.50
       with:
         branch: master

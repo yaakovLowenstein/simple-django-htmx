@@ -1,8 +1,10 @@
 from typing import Dict
+
+from django.apps import apps
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
-from django.apps import apps
+
 from simple_django_htmx.views import MessagesMixin
 
 

@@ -1,18 +1,17 @@
 import importlib
 import inspect
-from django.apps import apps
-from django.http import HttpRequest, HttpResponse
-from django.views.generic.base import View
-from typing import Any, Dict
 import json
-from django.contrib import messages
+from typing import Any, Dict
 
+from django.apps import apps
+from django.conf import settings
+from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-
+from django.views.generic.base import View
 
 from simple_django_htmx.utils import deserialize_kwargs, is_htmx_request
-from django.conf import settings
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
